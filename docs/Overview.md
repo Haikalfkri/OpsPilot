@@ -55,7 +55,7 @@ This is a single-workspace/team-oriented MVP. Full multi-tenant SaaS billing, ex
 - C# with ASP.NET Core Web API.
 - Controller-based API using **base controllers** (not Minimal APIs).
 - Entity Framework Core for persistence.
-- PostgreSQL as the relational database.
+- SQL Server as the relational database.
 - Redis for distributed caching of selected dashboard/query results.
 - JWT bearer authentication for the API.
 - FluentValidation or equivalent explicit request validation.

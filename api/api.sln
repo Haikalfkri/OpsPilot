@@ -3,7 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36401.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api", "api\api.csproj", "{5087C1FD-78D9-4882-9811-589B2F7F150C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Api", "api\OpsPilot.Api.csproj", "{5087C1FD-78D9-4882-9811-589B2F7F150C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Domain", "Domain\OpsPilot.Domain.csproj", "{A198C819-5CC1-4398-8D43-0E89C8A7273D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Application", "Application\OpsPilot.Application.csproj", "{3EC27790-3DB9-4727-840F-D1236A6C6208}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Infrastructure", "Infrastructure\OpsPilot.Infrastructure.csproj", "{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +26,18 @@ Global
 		{5087C1FD-78D9-4882-9811-589B2F7F150C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5087C1FD-78D9-4882-9811-589B2F7F150C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5087C1FD-78D9-4882-9811-589B2F7F150C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A198C819-5CC1-4398-8D43-0E89C8A7273D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A198C819-5CC1-4398-8D43-0E89C8A7273D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A198C819-5CC1-4398-8D43-0E89C8A7273D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A198C819-5CC1-4398-8D43-0E89C8A7273D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EC27790-3DB9-4727-840F-D1236A6C6208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EC27790-3DB9-4727-840F-D1236A6C6208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EC27790-3DB9-4727-840F-D1236A6C6208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC27790-3DB9-4727-840F-D1236A6C6208}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
