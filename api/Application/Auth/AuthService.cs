@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using OpsPilot.Application.Common.Exceptions;
 using OpsPilot.Application.Common.Interfaces;
+using OpsPilot.Application.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace OpsPilot.Application.Auth
                 ?? throw new AuthenticationFailedException();
 
             var token = tokens.Create(user);
-            return new LoginResponse(token.Token, "Bearer", token.ExpiresAtUtc, UserDto.From(user));
+            return new LoginResponse(token.Token, "Bearer", token.ExpiresAtUtc, user.ToDto());
         }
 
         public async Task<UserDto> GetCurrentUserAsync(CancellationToken ct)
@@ -37,7 +38,7 @@ namespace OpsPilot.Application.Auth
             var user = await identity.GetByIdAsync(currentUser.UserId, ct)
                 ?? throw new AuthenticationFailedException();
 
-            return UserDto.From(user);
+            return user.ToDto();
         }
     }
 }

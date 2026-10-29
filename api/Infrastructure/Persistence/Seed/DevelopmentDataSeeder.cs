@@ -38,6 +38,9 @@ public sealed class DevelopmentDataSeeder(
         // User dari tim lain, dipakai untuk menguji bahwa data antar tim tidak bocor
         new(Guid.Parse("b0000000-0000-0000-0000-000000000001"),
             "other.responder@opspilot.local", "Other Team Responder", UserRole.Responder, OtherTeamId),
+
+        new(Guid.Parse("b0000000-0000-0000-0000-000000000002"),
+            "other.admin@opspilot.local", "Other Team Admin", UserRole.Admin, OtherTeamId),
     };
 
     public async Task SeedAsync(CancellationToken ct = default)
