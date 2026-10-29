@@ -16,6 +16,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02EA68
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6EA9E38C-4203-4830-8EAD-70708775F71A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Application.Tests", "OpsPilot.Application.Tests\OpsPilot.Application.Tests.csproj", "{3F01F26A-0449-4E09-907D-12FE2CE38EFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Infrastructure.Tests", "OpsPilot.Infrastructure.Tests\OpsPilot.Infrastructure.Tests.csproj", "{05149C8C-3EE0-468F-B70D-AAA7F475D4D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpsPilot.Api.IntegrationTest", "OpsPilot.Api.IntegrationTest\OpsPilot.Api.IntegrationTest.csproj", "{5238F8DB-E097-4370-8551-34A7A4C912DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,9 +46,26 @@ Global
 		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D382FCD6-1736-46AF-8A38-8BB20CDBAF01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F01F26A-0449-4E09-907D-12FE2CE38EFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F01F26A-0449-4E09-907D-12FE2CE38EFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F01F26A-0449-4E09-907D-12FE2CE38EFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F01F26A-0449-4E09-907D-12FE2CE38EFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05149C8C-3EE0-468F-B70D-AAA7F475D4D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05149C8C-3EE0-468F-B70D-AAA7F475D4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05149C8C-3EE0-468F-B70D-AAA7F475D4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05149C8C-3EE0-468F-B70D-AAA7F475D4D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5238F8DB-E097-4370-8551-34A7A4C912DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5238F8DB-E097-4370-8551-34A7A4C912DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5238F8DB-E097-4370-8551-34A7A4C912DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5238F8DB-E097-4370-8551-34A7A4C912DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3F01F26A-0449-4E09-907D-12FE2CE38EFA} = {6EA9E38C-4203-4830-8EAD-70708775F71A}
+		{05149C8C-3EE0-468F-B70D-AAA7F475D4D1} = {6EA9E38C-4203-4830-8EAD-70708775F71A}
+		{5238F8DB-E097-4370-8551-34A7A4C912DD} = {6EA9E38C-4203-4830-8EAD-70708775F71A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {907ED521-F10B-4E6E-8936-28B65A19ED3C}
