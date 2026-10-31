@@ -140,6 +140,18 @@ public sealed class IdentityService(UserManager<ApplicationUser> users, TimeProv
             u => u.TeamId == teamId && u.Role == UserRole.Admin && u.IsActive, ct);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
+    IReadOnlyCollection<Guid> userIds, CancellationToken ct)
+    {
+        var ids = userIds.ToList();
+
+        // Satu query: SELECT Id, DisplayName FROM Users WHERE Id IN (...)
+        return await users.Users
+            .AsNoTracking()
+            .Where(u => ids.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.DisplayName, ct);
+    }
+
     private static UserInfo ToUserInfo(ApplicationUser u) =>
         new(u.Id, u.DisplayName, u.Email!, u.Role, u.TeamId, u.IsActive);
 }

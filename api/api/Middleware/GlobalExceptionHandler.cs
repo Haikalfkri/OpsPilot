@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using OpsPilot.Application.Common.Exceptions;
+using OpsPilot.Domain.Exceptions;
 
 namespace OpsPilot.Api.Middleware;
 
@@ -33,6 +34,7 @@ public sealed class GlobalExceptionHandler(
             ForbiddenException => Problem(403, "Forbidden", exception.Message, extensions),
             NotFoundException => Problem(404, "Not found", exception.Message, extensions),
             ConflictException => Problem(409, "Conflict", exception.Message, extensions),
+            DomainRuleException => Problem(409, "Conflict", exception.Message, extensions),
 
             _ => UnexpectedError(http, exception, extensions)
         };

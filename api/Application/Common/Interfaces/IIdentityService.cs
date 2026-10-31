@@ -13,7 +13,7 @@ public interface IIdentityService
 
     Task<PagedResult<UserInfo>> ListTeamUsersAsync(Guid teamId, ListUsersQuery query, CancellationToken ct);
 
-    // apakah sudah ada user dengan email ini?</summary>
+    // apakah sudah ada user dengan email ini?
     Task<bool> EmailExistsAsync(string email, CancellationToken ct);
 
     // membuat user baru di tim tertentu. Password disimpan dalam bentuk hash
@@ -26,4 +26,7 @@ public interface IIdentityService
 
     // jumlah Admin yang masih aktif di sebuah tim
     Task<int> CountActiveAdminsAsync(Guid teamId, CancellationToken ct);
+
+    Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
+        IReadOnlyCollection<Guid> userIds, CancellationToken ct);
 }
