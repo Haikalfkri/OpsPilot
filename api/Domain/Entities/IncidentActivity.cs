@@ -12,10 +12,25 @@ namespace OpsPilot.Domain.Entities
         public Guid Id { get; set; }
         public Guid IncidentId { get; set; }
         public Incident Incident { get; set; } = null!;
-        public Guid? ActorId { get; set; }
+        public Guid? ActorId { get; set; }          // null = dilakukan oleh sistem (misalnya SLA worker)
         public ActivityType Type { get; set; }
         public string Message { get; set; } = string.Empty;
         public string? MetadataJson { get; set; }
         public DateTimeOffset CreatedAtUtc { get; set; }
+
+        public static IncidentActivity Create(
+            Guid incidentId, Guid? actorId, ActivityType type, string message, string? metadataJson, DateTimeOffset now) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                IncidentId = incidentId,
+                ActorId = actorId,
+                Type = type,
+                Message = message,
+                MetadataJson = metadataJson,
+                CreatedAtUtc = now
+            };
+
+
     }
 }

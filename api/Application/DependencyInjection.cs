@@ -1,15 +1,12 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using OpsPilot.Application.Activities;
 using OpsPilot.Application.Auth;
+using OpsPilot.Application.Comments;
 using OpsPilot.Application.Incidents;
 using OpsPilot.Application.Teams;
 using OpsPilot.Application.Users;
 using OpsPilot.Domain.Sla;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpsPilot.Application
 {
@@ -24,6 +21,8 @@ namespace OpsPilot.Application
             services.AddScoped<ITeamsService, TeamService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IIncidentService, IncidentService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IActivityService, ActivityService>();
 
             return services;
         }

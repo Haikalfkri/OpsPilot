@@ -2,12 +2,17 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OpsPilot.Api.Auth;
+using OpsPilot.Application.Activities;
+using OpsPilot.Application.Comments;
 using OpsPilot.Application.Common.Models;
 using OpsPilot.Application.Incidents;
 
 namespace OpsPilot.Api.Controllers
 {
-    public sealed class IncidentsController(IIncidentService incidentService) : ApiControllerBase
+    public sealed class IncidentsController(
+        IIncidentService incidentService,
+        ICommentService commentService,
+        IActivityService activityService) : ApiControllerBase
     {
         [Authorize(Policy = Policies.AnyTeamMember)]
         [HttpGet]
@@ -81,12 +86,56 @@ namespace OpsPilot.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<IncidentDetailDto>> Assign(
-        Guid id,
-        [FromBody] AssignIncidentRequest request,
-        CancellationToken cancellationToken)
+            Guid id,
+            [FromBody] AssignIncidentRequest request,
+            CancellationToken cancellationToken)
         {
             var updated = await incidentService.AssignAsync(id, request, cancellationToken);
             return Ok(updated);
+        }
+
+        [Authorize(Policy = Policies.AnyTeamMember)]
+        [HttpGet("{id:guid}/activities")]
+        [ProducesResponseType(typeof(PagedResult<ActivityDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PagedResult<ActivityDto>>> ListActivities(
+            Guid id,
+            [FromQuery] PageQuery query,
+            CancellationToken cancellationToken)
+        {
+            var result = await activityService.ListAsync(id, query, cancellationToken);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Policies.AnyTeamMember)]
+        [HttpGet("{id:guid}/comments")]
+        [ProducesResponseType(typeof(PagedResult<CommentDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PagedResult<CommentDto>>> ListComments(
+            Guid id,
+            [FromQuery] PageQuery query,
+            CancellationToken cancellationToken)
+        {
+            var result = await commentService.ListAsync(id, query, cancellationToken);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Policies.CanManageIncidents)]
+        [HttpPost("{id:guid}/comments")]
+        [ProducesResponseType(typeof(CommentDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CommentDto>> AddComment(
+            Guid id,
+            [FromBody] CreateCommentRequest request,
+            CancellationToken cancellationToken)
+        {
+            var created = await commentService.AddAsync(id, request, cancellationToken);
+
+            return StatusCode(StatusCodes.Status201Created, created);
         }
     }
 }
