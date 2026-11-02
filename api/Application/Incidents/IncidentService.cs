@@ -33,9 +33,6 @@ public sealed class IncidentService(
     SlaPolicy sla,
     TimeProvider clock) : IIncidentService
 {
-    // Peringkat severity untuk sorting. Severity disimpan sebagai TEKS di database,
-    // jadi kalau diurutkan langsung hasilnya alfabetis (Critical, High, Low, Medium) yang salah.
-    // Ekspresi ini mengubahnya jadi angka: Critical=3, High=2, Medium=1, Low=0.
     private static readonly Expression<Func<Incident, int>> SeverityRank = i =>
         i.Severity == IncidentSeverity.Critical ? 3 :
         i.Severity == IncidentSeverity.High ? 2 :
@@ -133,14 +130,15 @@ public sealed class IncidentService(
 
         if (incident.AssigneeId is { } assigned)
         {
-            var names = await GetNamesAsync(new Guid?[] { assigned }, ct);
+            var names = await GetNamesAsync(new Guid?[] { assigned, currentUser.UserId }, ct);
 
             AddActivity(incident.Id, ActivityType.AssigneeChanged,
                 $"Assigned to {DisplayName(assigned, names)}",
                 new { from = (Guid?)null, to = assigned }, now);
+
+            AddAssignmentNotification(incident, assigned, DisplayName(currentUser.UserId, names), now);
         }
 
-        // SATU SaveChanges = incident + activity tersimpan bersamaan, atau tidak sama sekali.
         await db.SaveChangesAsync(ct);
 
         return await ToDetailAsync(incident, ct);
@@ -243,15 +241,21 @@ public sealed class IncidentService(
 
         incident.AssignTo(newAssigneeId, now);
 
-        var names = await GetNamesAsync(new Guid?[] { oldAssigneeId, newAssigneeId }, ct);
+        var names = await GetNamesAsync(new Guid?[] { oldAssigneeId, newAssigneeId, currentUser.UserId }, ct);
 
         AddActivity(incident.Id, ActivityType.AssigneeChanged,
             $"Assignee changed from {DisplayName(oldAssigneeId, names)} to {DisplayName(newAssigneeId, names)}",
             new { from = oldAssigneeId, to = newAssigneeId }, now);
 
+        // Notifikasi hanya untuk assignee BARU (melepas assignee tidak membuat notifikasi)
+        if (newAssigneeId is { } newAssignee)
+            AddAssignmentNotification(incident, newAssignee, DisplayName(currentUser.UserId, names), now);
+
         await db.SaveChangesAsync(ct);
         return await ToDetailAsync(incident, ct);
     }
+
+    // ============================== HELPER ==============================
 
     private void EnsureCanWrite()
     {
@@ -301,6 +305,20 @@ public sealed class IncidentService(
             MetadataJson = metadata is null ? null : JsonSerializer.Serialize(metadata),
             CreatedAtUtc = now
         });
+    }
+
+    private void AddAssignmentNotification(Incident incident, Guid assigneeId, string actorName, DateTimeOffset now)
+    {
+        if (assigneeId == currentUser.UserId)
+            return;
+
+        db.Notifications.Add(Notification.Create(
+            assigneeId,
+            incident.Id,
+            NotificationType.IncidentAssigned,
+            "Incident assigned to you",
+            $"{actorName} assigned you to \"{incident.Title}\" ({incident.Severity}).",
+            now));
     }
 
     private static IOrderedQueryable<Incident> ApplySorting(IQueryable<Incident> q, string sortBy, string sortDirection)

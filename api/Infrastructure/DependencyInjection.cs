@@ -52,6 +52,16 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddScoped<DevelopmentDataSeeder>();
 
+        // ---------- Worker SLA (tugas latar belakang) ----------
+        services.AddOptions<SlaWorkerOptions>()
+            .Bind(configuration.GetSection(SlaWorkerOptions.SectionName))
+            .Validate(o => o.IntervalSeconds >= 1, "SlaWorker:IntervalSeconds must be at least 1.")
+            .ValidateOnStart();
+
+        // Worker hanya dijalankan kalau tidak dimatikan lewat konfigurasi
+        if (configuration.GetValue("SlaWorker:Enabled", true))
+            services.AddHostedService<SlaBreachWorker>();
+
         // ---------- Health check + Redis ----------
         var healthChecks = services.AddHealthChecks()
             .AddDbContextCheck<OpsPilotDbContext>("postgres");

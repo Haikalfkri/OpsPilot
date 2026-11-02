@@ -402,4 +402,112 @@ public class IncidentServiceTests
 
         Assert.Null((await _db.Incidents.SingleAsync()).AssigneeId);
     }
+
+    // ==================== Notifikasi assignment (Phase 7) ====================
+
+    [Fact]
+    public async Task Create_WithAnAssignee_CreatesANotificationForThem()
+    {
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId);
+
+        var result = await _sut.CreateAsync(ValidCreate(assigneeId: assigneeId), CancellationToken.None);
+
+        var notification = await _db.Notifications.SingleAsync();
+        Assert.Equal(assigneeId, notification.RecipientId);
+        Assert.Equal(result.Id, notification.IncidentId);
+        Assert.Equal(NotificationType.IncidentAssigned, notification.Type);
+        Assert.False(notification.IsRead);
+        Assert.Equal(_now, notification.CreatedAtUtc);
+        Assert.Contains("Database is down", notification.Message);
+    }
+
+    [Fact]
+    public async Task Create_WithoutAnAssignee_CreatesNoNotification()
+    {
+        await _sut.CreateAsync(ValidCreate(), CancellationToken.None);
+
+        Assert.Empty(_db.Notifications);
+    }
+
+    [Fact]
+    public async Task Create_AssigningToMyself_CreatesNoNotification()
+    {
+        GivenAssignee(_myUserId);
+
+        await _sut.CreateAsync(ValidCreate(assigneeId: _myUserId), CancellationToken.None);
+
+        Assert.Empty(_db.Notifications);
+    }
+
+    [Fact]
+    public async Task Assign_NotifiesTheNewAssignee()
+    {
+        var incident = await SeedIncidentAsync();
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId);
+
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None);
+
+        var notification = await _db.Notifications.SingleAsync();
+        Assert.Equal(assigneeId, notification.RecipientId);
+        Assert.Equal(incident.Id, notification.IncidentId);
+    }
+
+    [Fact]
+    public async Task Assign_TheSameAssigneeTwice_CreatesOnlyOneNotification()
+    {
+        var incident = await SeedIncidentAsync();
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId);
+
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None);
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None);
+
+        Assert.Single(_db.Notifications);
+    }
+
+    [Fact]
+    public async Task Assign_Reassigning_NotifiesEachNewAssignee_ButNotTheOldOneAgain()
+    {
+        var incident = await SeedIncidentAsync();
+        var first = Guid.NewGuid();
+        var second = Guid.NewGuid();
+        GivenAssignee(first);
+        GivenAssignee(second);
+
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(first), CancellationToken.None);
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(second), CancellationToken.None);
+
+        var recipients = await _db.Notifications.Select(n => n.RecipientId).ToListAsync();
+        Assert.Equal(2, recipients.Count);       // bukan 3: yang lama tidak diberi tahu lagi
+        Assert.Contains(first, recipients);
+        Assert.Contains(second, recipients);
+    }
+
+    [Fact]
+    public async Task Assign_Unassigning_CreatesNoNotification()
+    {
+        var incident = await SeedIncidentAsync();
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId);
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None);
+
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(null), CancellationToken.None);
+
+        Assert.Single(_db.Notifications);        // hanya dari assign pertama
+    }
+
+    [Fact]
+    public async Task Assign_ToAnInvalidUser_CreatesNoNotification()
+    {
+        var incident = await SeedIncidentAsync();
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId, isActive: false);
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None));
+
+        Assert.Empty(_db.Notifications);
+    }
 }

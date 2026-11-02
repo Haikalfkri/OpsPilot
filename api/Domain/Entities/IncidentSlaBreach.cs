@@ -15,5 +15,16 @@ namespace OpsPilot.Domain.Entities
         public SlaBreachType BreachType { get; set; }
         public DateTimeOffset BreachedAtUtc { get; set; }
         public DateTimeOffset CreatedAtUtc { get; set; }
+
+        public static IncidentSlaBreach Create(
+            Guid incidentId, SlaBreachType type, DateTimeOffset breachedAtUtc, DateTimeOffset now) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                IncidentId = incidentId,
+                BreachType = type,
+                BreachedAtUtc = breachedAtUtc,
+                CreatedAtUtc = now
+            };
     }
 }

@@ -4,6 +4,7 @@ using OpsPilot.Application.Activities;
 using OpsPilot.Application.Auth;
 using OpsPilot.Application.Comments;
 using OpsPilot.Application.Incidents;
+using OpsPilot.Application.Notifications;
 using OpsPilot.Application.Sla;
 using OpsPilot.Application.Teams;
 using OpsPilot.Application.Users;
@@ -23,6 +24,8 @@ namespace OpsPilot.Application
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<ISlaService, SlaService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ISlaBreachService, SlaBreachService>();
 
             return services;
         }

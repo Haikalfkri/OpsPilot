@@ -23,6 +23,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         Environment.SetEnvironmentVariable("ConnectionStrings__Postgres", _postgres.GetConnectionString());
         Environment.SetEnvironmentVariable("ConnectionStrings__Redis", " ");   // spasi = Redis dimatikan
         Environment.SetEnvironmentVariable("Jwt__SigningKey", "kunci-rahasia-untuk-tes-integrasi-minimal-32-karakter");
+        Environment.SetEnvironmentVariable("SlaWorker__Enabled", "false");   // tes memicu pengecekan sendiri
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

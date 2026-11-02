@@ -29,4 +29,6 @@ public interface IIdentityService
 
     Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds, CancellationToken ct);
+
+    Task<IReadOnlyList<Guid>> GetActiveAdminIdsAsync(Guid teamId, CancellationToken ct);
 }

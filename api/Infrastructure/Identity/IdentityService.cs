@@ -152,6 +152,15 @@ public sealed class IdentityService(UserManager<ApplicationUser> users, TimeProv
             .ToDictionaryAsync(u => u.Id, u => u.DisplayName, ct);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetActiveAdminIdsAsync(Guid teamId, CancellationToken ct)
+    {
+        return await users.Users
+            .AsNoTracking()
+            .Where(u => u.TeamId == teamId && u.Role == UserRole.Admin && u.IsActive)
+            .Select(u => u.Id)
+            .ToListAsync(ct);
+    }
+
     private static UserInfo ToUserInfo(ApplicationUser u) =>
         new(u.Id, u.DisplayName, u.Email!, u.Role, u.TeamId, u.IsActive);
 }
