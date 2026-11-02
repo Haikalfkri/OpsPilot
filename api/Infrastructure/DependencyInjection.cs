@@ -7,6 +7,7 @@ using OpsPilot.Application.Common.Interfaces;
 using OpsPilot.Infrastructure.Identity;
 using OpsPilot.Infrastructure.Persistence;
 using OpsPilot.Infrastructure.Persistence.Seed;
+using OpsPilot.Infrastructure.Sla;
 
 namespace OpsPilot.Infrastructure;
 
@@ -17,6 +18,7 @@ public static class DependencyInjection
     {
         // Jam sistem (bisa diganti jam palsu saat testing)
         services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton(SlaPolicyFactory.Create(configuration.GetSection("Sla")));
 
         // ---------- Database ----------
         var postgres = configuration.GetConnectionString("Postgres");

@@ -4,9 +4,9 @@ using OpsPilot.Application.Activities;
 using OpsPilot.Application.Auth;
 using OpsPilot.Application.Comments;
 using OpsPilot.Application.Incidents;
+using OpsPilot.Application.Sla;
 using OpsPilot.Application.Teams;
 using OpsPilot.Application.Users;
-using OpsPilot.Domain.Sla;
 
 namespace OpsPilot.Application
 {
@@ -15,7 +15,6 @@ namespace OpsPilot.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
-            services.AddSingleton(SlaPolicy.Default());
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITeamsService, TeamService>();
@@ -23,6 +22,7 @@ namespace OpsPilot.Application
             services.AddScoped<IIncidentService, IncidentService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<ISlaService, SlaService>();
 
             return services;
         }

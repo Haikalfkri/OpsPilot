@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using OpsPilot.Domain.Entities;
+using OpsPilot.Domain.Enums;
 using OpsPilot.Domain.Rules;
 
 namespace OpsPilot.Application.Incidents;
@@ -13,13 +14,18 @@ public static class IncidentMapper
             i.Severity,
             i.Status,
             i.AssigneeId,
-            null,                      // AssigneeName: diisi oleh service
+            null,                      
             i.CreatedAtUtc,
             i.UpdatedAtUtc,
+            i.FirstRespondedAtUtc,
+            i.ResolvedAtUtc,
             i.ResponseDueAtUtc,
-            i.ResolutionDueAtUtc);
+            i.ResolutionDueAtUtc,
+            SlaState.Pending,         
+            SlaState.Pending);         
 
-    public static IncidentDetailDto ToDetailDto(this Incident i, string? creatorName, string? assigneeName) =>
+    public static IncidentDetailDto ToDetailDto(
+        this Incident i, string? creatorName, string? assigneeName, DateTimeOffset now) =>
         new(
             i.Id,
             i.TeamId,
@@ -38,5 +44,7 @@ public static class IncidentMapper
             i.ClosedAtUtc,
             i.ResponseDueAtUtc,
             i.ResolutionDueAtUtc,
+            i.GetResponseSla(now),
+            i.GetResolutionSla(now),
             IncidentStatusRules.GetNextStatuses(i.Status));
 }

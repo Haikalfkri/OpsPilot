@@ -84,8 +84,17 @@ public sealed class IncidentService(
         // Lengkapi nama assignee dengan SATU query tambahan (bukan satu per baris)
         var names = await GetNamesAsync(items.Select(i => i.AssigneeId), ct);
 
+        var now = clock.GetUtcNow();
+
         var withNames = items
-            .Select(i => i with { AssigneeName = FindName(i.AssigneeId, names) })
+            .Select(i => i with
+            {
+                AssigneeName = FindName(i.AssigneeId, names),
+                ResponseSla = SlaEvaluator.EvaluateResponse(
+                    i.ResponseDueAtUtc, i.FirstRespondedAtUtc, i.ResolvedAtUtc, now),
+                ResolutionSla = SlaEvaluator.EvaluateResolution(
+                    i.ResolutionDueAtUtc, i.ResolvedAtUtc, now)
+            })
             .ToList();
 
         return new PagedResult<IncidentSummaryDto>(withNames, query.Page, query.PageSize, totalCount);
@@ -333,6 +342,7 @@ public sealed class IncidentService(
 
         return incident.ToDetailDto(
             FindName(incident.CreatedById, names),
-            FindName(incident.AssigneeId, names));
+            FindName(incident.AssigneeId, names),
+            clock.GetUtcNow());
     }
 }

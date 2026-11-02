@@ -1,7 +1,6 @@
 ﻿using OpsPilot.Domain.Enums;
 
 namespace OpsPilot.Domain.Sla;
-
 public sealed record SlaTargets(TimeSpan ResponseTarget, TimeSpan ResolutionTarget);
 
 public sealed class SlaPolicy
@@ -12,8 +11,15 @@ public sealed class SlaPolicy
     {
         foreach (var severity in Enum.GetValues<IncidentSeverity>())
         {
-            if (!targets.ContainsKey(severity))
+            if (!targets.TryGetValue(severity, out var target))
                 throw new ArgumentException($"No SLA targets configured for severity {severity}.", nameof(targets));
+
+            if (target.ResponseTarget <= TimeSpan.Zero || target.ResolutionTarget <= TimeSpan.Zero)
+                throw new ArgumentException($"SLA targets for {severity} must be greater than zero.", nameof(targets));
+
+            if (target.ResolutionTarget < target.ResponseTarget)
+                throw new ArgumentException(
+                    $"SLA resolution target for {severity} cannot be shorter than its response target.", nameof(targets));
         }
 
         _targets = targets;

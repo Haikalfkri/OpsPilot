@@ -103,6 +103,12 @@ public class Incident
         UpdatedAtUtc = now;
     }
 
+    public SlaState GetResponseSla(DateTimeOffset now) =>
+        SlaEvaluator.EvaluateResponse(ResponseDueAtUtc, FirstRespondedAtUtc, ResolvedAtUtc, now);
+
+    public SlaState GetResolutionSla(DateTimeOffset now) =>
+        SlaEvaluator.EvaluateResolution(ResolutionDueAtUtc, ResolvedAtUtc, now);
+
     private void RecalculateSlaTargets(SlaPolicy sla)
     {
         var (response, resolution) = sla.CalculateDueDates(CreatedAtUtc, Severity);
