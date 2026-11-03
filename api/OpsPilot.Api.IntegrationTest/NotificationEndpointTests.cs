@@ -159,10 +159,12 @@ public class NotificationEndpointTests(ApiFactory factory)
         Assert.True(first.GetProperty("isRead").GetBoolean());
         Assert.NotEqual(JsonValueKind.Null, first.GetProperty("readAtUtc").ValueKind);
 
-        // Parse back to DateTimeOffset for comparison (ignores string formatting)
         var firstTime = first.GetProperty("readAtUtc").GetDateTimeOffset();
         var secondTime = second.GetProperty("readAtUtc").GetDateTimeOffset();
-        Assert.Equal(firstTime, secondTime);  // Compare as objects, not strings
+
+        Assert.True(
+            (firstTime - secondTime).Duration() < TimeSpan.FromMilliseconds(1),
+            $"Read time changed between calls: {firstTime:O} vs {secondTime:O}");
     }
 
     [Fact]

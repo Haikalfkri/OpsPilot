@@ -20,6 +20,7 @@ public class IncidentSlaStateTests
     private readonly TestDbContext _db = TestDbContext.CreateNew();
     private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly IDashboardCache _dashboardCache = Substitute.For<IDashboardCache>();
     private readonly Guid _teamId = Guid.NewGuid();
 
     public IncidentSlaStateTests()
@@ -44,7 +45,8 @@ public class IncidentSlaStateTests
         _identity,
         _currentUser,
         SlaPolicy.Default(),
-        new FixedTimeProvider(now));
+        new FixedTimeProvider(now),
+        _dashboardCache);
 
     private async Task<Incident> SeedAsync(
         IncidentSeverity severity = IncidentSeverity.Critical,

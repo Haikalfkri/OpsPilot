@@ -10,11 +10,6 @@ using Xunit;
 
 namespace OpsPilot.Application.Tests.Sla;
 
-/// <summary>
-/// Semua incident di sini dibuat pada T0 dengan severity Critical bawaan:
-/// batas respons T0 + 15 menit, batas penyelesaian T0 + 4 jam.
-/// Waktu "sekarang" digeser lewat jam palsu.
-/// </summary>
 public class SlaBreachServiceTests
 {
     private static readonly DateTimeOffset T0 = new(2026, 10, 30, 8, 0, 0, TimeSpan.Zero);
@@ -23,6 +18,7 @@ public class SlaBreachServiceTests
     private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
     private readonly MutableTimeProvider _clock = new(T0);
     private readonly SlaBreachService _sut;
+    private readonly IDashboardCache _dashboardCache = Substitute.For<IDashboardCache>();
 
     private readonly Guid _teamId = Guid.NewGuid();
     private readonly Guid _admin1 = Guid.NewGuid();
@@ -31,7 +27,7 @@ public class SlaBreachServiceTests
     public SlaBreachServiceTests()
     {
         GivenAdmins(_teamId, _admin1, _admin2);
-        _sut = new SlaBreachService(_db, _identity, _clock);
+        _sut = new SlaBreachService(_db, _identity, _clock, _dashboardCache);
     }
 
     // ---------- Helper ----------
@@ -281,5 +277,52 @@ public class SlaBreachServiceTests
         Assert.Equal(1, result.BreachesRecorded);
         Assert.Equal(0, result.NotificationsCreated);
         Assert.Single(_db.IncidentActivities);
+    }
+
+    // ==================== Cache dashboard (Phase 8) ====================
+
+    [Fact]
+    public async Task Run_InvalidatesTheDashboardCacheOnceForEachAffectedTeam()
+    {
+        var otherTeam = Guid.NewGuid();
+        GivenAdmins(otherTeam, Guid.NewGuid());
+
+        await SeedAsync();                      // tim saya: dua incident terlambat
+        await SeedAsync();
+        await SeedAsync(teamId: otherTeam);     // tim lain: satu incident terlambat
+
+        await RunAtAsync(16);
+
+        // Satu kali per tim, walaupun satu tim punya dua incident yang terlambat
+        await _dashboardCache.Received(1).InvalidateTeamAsync(_teamId, Arg.Any<CancellationToken>());
+        await _dashboardCache.Received(1).InvalidateTeamAsync(otherTeam, Arg.Any<CancellationToken>());
+        await _dashboardCache.ReceivedWithAnyArgs(2).InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Run_WhenNothingIsRecorded_DoesNotTouchTheCache()
+    {
+        await SeedAsync();
+
+        await RunAtAsync(10);    // belum ada yang lewat batas
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Run_InvalidatesTheCacheOnlyAfterTheBreachesAreSaved()
+    {
+        await SeedAsync();
+
+        // Saat penghapusan cache dipanggil, catat berapa catatan pelanggaran yang sudah ada di database
+        var breachesVisibleDuringInvalidation = -1;
+        _dashboardCache
+            .When(c => c.InvalidateTeamAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()))
+            .Do(_ => breachesVisibleDuringInvalidation = _db.IncidentSlaBreaches.AsNoTracking().Count());
+
+        await RunAtAsync(16);
+
+        // Kalau cache dihapus SEBELUM disimpan, nilainya 0
+        Assert.Equal(1, breachesVisibleDuringInvalidation);
     }
 }

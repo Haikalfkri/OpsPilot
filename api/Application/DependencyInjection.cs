@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpsPilot.Application.Activities;
 using OpsPilot.Application.Auth;
 using OpsPilot.Application.Comments;
+using OpsPilot.Application.Dashboard;
 using OpsPilot.Application.Incidents;
 using OpsPilot.Application.Notifications;
 using OpsPilot.Application.Sla;
@@ -26,6 +27,7 @@ namespace OpsPilot.Application
             services.AddScoped<ISlaService, SlaService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISlaBreachService, SlaBreachService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
             return services;
         }

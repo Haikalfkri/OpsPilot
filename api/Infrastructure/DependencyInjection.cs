@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpsPilot.Application.Common.Interfaces;
+using OpsPilot.Infrastructure.Caching;
 using OpsPilot.Infrastructure.Identity;
 using OpsPilot.Infrastructure.Persistence;
 using OpsPilot.Infrastructure.Persistence.Seed;
@@ -76,6 +77,12 @@ public static class DependencyInjection
             });
 
             healthChecks.AddRedis(redis, name: "redis");
+
+            services.AddSingleton<IDashboardCache, DistributedDashboardCache>();
+        }
+        else
+        {
+            services.AddSingleton<IDashboardCache, NoDashboardCache>();
         }
 
         return services;

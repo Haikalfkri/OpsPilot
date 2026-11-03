@@ -17,7 +17,8 @@ public interface ISlaBreachService
 public sealed class SlaBreachService(
     IApplicationDbContext db,
     IIdentityService identity,
-    TimeProvider clock) : ISlaBreachService
+    TimeProvider clock,
+    IDashboardCache dashboardCache) : ISlaBreachService
 {
     private const int MaxIncidentsPerRun = 500;
 
@@ -31,6 +32,8 @@ public sealed class SlaBreachService(
             return new SlaBreachRunResult(0, 0, 0);
 
         var adminsByTeam = new Dictionary<Guid, IReadOnlyList<Guid>>();
+
+        var affectedTeams = new HashSet<Guid>();
 
         var breaches = 0;
         var notifications = 0;
@@ -48,6 +51,7 @@ public sealed class SlaBreachService(
                 notifications += await RecordBreachAsync(
                     incident, SlaBreachType.Response, incident.ResponseDueAtUtc, now, adminsByTeam, ct);
                 breaches++;
+                affectedTeams.Add(incident.TeamId);
             }
 
             if (resolutionState == SlaState.Breached && !HasRecord(incident, SlaBreachType.Resolution))
@@ -55,10 +59,14 @@ public sealed class SlaBreachService(
                 notifications += await RecordBreachAsync(
                     incident, SlaBreachType.Resolution, incident.ResolutionDueAtUtc, now, adminsByTeam, ct);
                 breaches++;
+                affectedTeams.Add(incident.TeamId);
             }
         }
 
         await db.SaveChangesAsync(ct);
+
+        foreach (var teamId in affectedTeams)
+            await dashboardCache.InvalidateTeamAsync(teamId, ct);
 
         return new SlaBreachRunResult(candidates.Count, breaches, notifications);
     }

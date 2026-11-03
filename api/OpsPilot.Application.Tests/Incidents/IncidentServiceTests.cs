@@ -19,6 +19,7 @@ public class IncidentServiceTests
     private readonly TestDbContext _db = TestDbContext.CreateNew();
     private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly IDashboardCache _dashboardCache = Substitute.For<IDashboardCache>();
 
     private readonly DateTimeOffset _now = new(2026, 10, 30, 8, 0, 0, TimeSpan.Zero);
     private readonly Guid _myTeamId = Guid.NewGuid();
@@ -46,7 +47,8 @@ public class IncidentServiceTests
             _identity,
             _currentUser,
             SlaPolicy.Default(),
-            new FixedTimeProvider(_now));
+            new FixedTimeProvider(_now),
+            _dashboardCache);
     }
 
     // ---------- Helper ----------
@@ -509,5 +511,98 @@ public class IncidentServiceTests
             _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None));
 
         Assert.Empty(_db.Notifications);
+    }
+
+    // ==================== Cache dashboard (Phase 8) ====================
+
+    [Fact]
+    public async Task Create_InvalidatesTheDashboardCacheOfMyTeam()
+    {
+        await _sut.CreateAsync(ValidCreate(), CancellationToken.None);
+
+        await _dashboardCache.Received(1).InvalidateTeamAsync(_myTeamId, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_WithAnInvalidRequest_DoesNotTouchTheCache()
+    {
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _sut.CreateAsync(ValidCreate() with { Title = "abc" }, CancellationToken.None));
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task ChangeStatus_InvalidatesTheDashboardCacheOfMyTeam()
+    {
+        var incident = await SeedIncidentAsync();
+
+        await _sut.ChangeStatusAsync(incident.Id, new ChangeStatusRequest(IncidentStatus.Investigating), CancellationToken.None);
+
+        await _dashboardCache.Received(1).InvalidateTeamAsync(_myTeamId, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ChangeStatus_WithAnIllegalTransition_DoesNotTouchTheCache()
+    {
+        var incident = await SeedIncidentAsync();   // Open
+
+        await Assert.ThrowsAsync<DomainRuleException>(() =>
+            _sut.ChangeStatusAsync(incident.Id, new ChangeStatusRequest(IncidentStatus.Closed), CancellationToken.None));
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Update_ChangingTheSeverity_InvalidatesTheCache()
+    {
+        var incident = await SeedIncidentAsync(severity: IncidentSeverity.Low);
+
+        await _sut.UpdateAsync(incident.Id, new UpdateIncidentRequest(Severity: IncidentSeverity.Critical), CancellationToken.None);
+
+        await _dashboardCache.Received(1).InvalidateTeamAsync(_myTeamId, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Update_ChangingOnlyTheTitle_DoesNotTouchTheCache()
+    {
+        var incident = await SeedIncidentAsync();
+
+        await _sut.UpdateAsync(incident.Id, new UpdateIncidentRequest(Title: "Judul baru yang valid"), CancellationToken.None);
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Update_WithTheSameSeverity_DoesNotTouchTheCache()
+    {
+        var incident = await SeedIncidentAsync(severity: IncidentSeverity.Medium);
+
+        await _sut.UpdateAsync(incident.Id, new UpdateIncidentRequest(Severity: IncidentSeverity.Medium), CancellationToken.None);
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Assign_DoesNotTouchTheCache_BecauseNoDashboardFigureDependsOnTheAssignee()
+    {
+        var incident = await SeedIncidentAsync();
+        var assigneeId = Guid.NewGuid();
+        GivenAssignee(assigneeId);
+
+        await _sut.AssignAsync(incident.Id, new AssignIncidentRequest(assigneeId), CancellationToken.None);
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
+    }
+
+    [Fact]
+    public async Task ChangeStatus_OnAnotherTeamsIncident_ThrowsNotFound_AndDoesNotTouchTheCache()
+    {
+        var foreign = await SeedIncidentAsync(teamId: Guid.NewGuid());
+
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            _sut.ChangeStatusAsync(foreign.Id, new ChangeStatusRequest(IncidentStatus.Investigating), CancellationToken.None));
+
+        await _dashboardCache.DidNotReceiveWithAnyArgs().InvalidateTeamAsync(default, default);
     }
 }

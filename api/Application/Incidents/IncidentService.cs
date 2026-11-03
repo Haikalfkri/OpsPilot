@@ -31,7 +31,8 @@ public sealed class IncidentService(
     IIdentityService identity,
     ICurrentUser currentUser,
     SlaPolicy sla,
-    TimeProvider clock) : IIncidentService
+    TimeProvider clock,
+    IDashboardCache dashboardCache) : IIncidentService
 {
     private static readonly Expression<Func<Incident, int>> SeverityRank = i =>
         i.Severity == IncidentSeverity.Critical ? 3 :
@@ -141,6 +142,8 @@ public sealed class IncidentService(
 
         await db.SaveChangesAsync(ct);
 
+        await dashboardCache.InvalidateTeamAsync(currentUser.TeamId, ct);
+
         return await ToDetailAsync(incident, ct);
     }
 
@@ -168,6 +171,8 @@ public sealed class IncidentService(
                 new { fields = changedFields }, now);
         }
 
+        var severityChanged = request.Severity is { } requested && requested != incident.Severity;
+
         // ---- Severity ----
         if (request.Severity is { } newSeverity && newSeverity != incident.Severity)
         {
@@ -181,6 +186,10 @@ public sealed class IncidentService(
 
         // Kalau tidak ada yang benar-benar berubah, SaveChanges tidak menulis apa pun.
         await db.SaveChangesAsync(ct);
+
+        if (severityChanged)
+            await dashboardCache.InvalidateTeamAsync(currentUser.TeamId, ct);
+
         return await ToDetailAsync(incident, ct);
     }
 
@@ -218,7 +227,8 @@ public sealed class IncidentService(
 
         await db.SaveChangesAsync(ct);
 
-        // Phase 8: hapus cache dashboard tim ini di sini.
+        await dashboardCache.InvalidateTeamAsync(currentUser.TeamId, ct);
+
         return await ToDetailAsync(incident, ct);
     }
 
