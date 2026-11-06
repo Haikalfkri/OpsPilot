@@ -23,6 +23,7 @@ var app = builder.Build();
 
 // ---------- Middleware (URUTAN PENTING) ----------
 app.UseSerilogRequestLogging();
+app.UseCors(ServiceCollectionExtensions.CorsPolicyName);
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -35,7 +36,7 @@ if (app.Environment.IsDevelopment())
     await app.Services.InitialiseDatabaseAsync(seedDemoData: true);
 }
 
-app.UseCors(ServiceCollectionExtensions.CorsPolicyName);
+//app.UseCors(ServiceCollectionExtensions.CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 
