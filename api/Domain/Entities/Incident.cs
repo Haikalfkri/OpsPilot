@@ -109,6 +109,14 @@ public class Incident
     public SlaState GetResolutionSla(DateTimeOffset now) =>
         SlaEvaluator.EvaluateResolution(ResolutionDueAtUtc, ResolvedAtUtc, now);
 
+    public void EnsureCanHavePostmortem()
+    {
+        if (Status is not (IncidentStatus.Resolved or IncidentStatus.Closed))
+        {
+            throw new DomainRuleException("A postmortem can only be written for a resolved or closed incident.");
+        }
+    }
+
     private void RecalculateSlaTargets(SlaPolicy sla)
     {
         var (response, resolution) = sla.CalculateDueDates(CreatedAtUtc, Severity);

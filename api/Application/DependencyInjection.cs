@@ -6,6 +6,7 @@ using OpsPilot.Application.Comments;
 using OpsPilot.Application.Dashboard;
 using OpsPilot.Application.Incidents;
 using OpsPilot.Application.Notifications;
+using OpsPilot.Application.Postmortems;
 using OpsPilot.Application.Sla;
 using OpsPilot.Application.Teams;
 using OpsPilot.Application.Users;
@@ -28,6 +29,7 @@ namespace OpsPilot.Application
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISlaBreachService, SlaBreachService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IPostmortemService, PostmortemService>();
 
             return services;
         }
