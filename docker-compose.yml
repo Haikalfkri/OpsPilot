@@ -9,11 +9,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-opspilot}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opspilot_dev}
     ports:
-      - "55432:5432"
+      - "15433:5432"
     volumes:
       - opspilot-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opspilot} -d ${POSTGRES_DB:-opspilot}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-opspilot} -d ${POSTGRES_DB:-opspilot}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -31,4 +35,4 @@ services:
       retries: 10
 
 volumes:
-  opspilot-pgdata:  
+  opspilot-pgdata:

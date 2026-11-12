@@ -9,7 +9,7 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Ops
     {
         var connectionString =
             Environment.GetEnvironmentVariable("OPSPILOT_DESIGN_CONNECTION")
-            ?? "Host=localhost;Port=55432;Database=opspilot;Username=opspilot;Password=opspilot_dev";
+            ?? "Host=localhost;Port=15433;Database=opspilot;Username=opspilot;Password=opspilot_dev";
 
         var options = new DbContextOptionsBuilder<OpsPilotDbContext>()
             .UseNpgsql(connectionString)
