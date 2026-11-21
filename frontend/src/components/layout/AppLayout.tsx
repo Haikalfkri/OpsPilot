@@ -4,6 +4,7 @@ import { getNavItems } from "@/components/layout/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
+import { NotificationBell } from "@/components/layout/NotificationBell"
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -27,6 +28,8 @@ export function AppLayout() {
           <span className="font-semibold md:hidden">OpsPilot</span>
 
           <div className="ml-auto flex items-center gap-3">
+            <NotificationBell />
+            
             <div className="hidden text-right text-sm leading-tight sm:block">
               <div className="font-medium">{user.displayName}</div>
               <div className="text-muted-foreground">{user.email}</div>

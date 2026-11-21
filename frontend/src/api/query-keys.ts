@@ -1,4 +1,5 @@
 import type { ListIncidentsParams } from "@/types/incident"
+import type { ListNotificationsParams } from "@/types/notification"
 
 const all = ["incidents"] as const
 
@@ -19,4 +20,13 @@ export const teamKeys = {
 
 export const slaKeys = {
   policy: ["sla", "policy"] as const,
+}
+
+const notificationsRoot = ["notifications"] as const
+
+export const notificationKeys = {
+  all: notificationsRoot,
+  lists: () => [...notificationsRoot, "list"] as const,
+  list: (params: ListNotificationsParams) => [...notificationsRoot, "list", params] as const,
+  unreadCount: () => [...notificationsRoot, "unread-count"] as const,
 }

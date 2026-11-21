@@ -4,6 +4,14 @@ import { describe, expect, it, vi } from "vitest"
 import { AuthContext, type AuthContextValue } from "@/hooks/auth-context"
 import { routes } from "@/routes"
 import type { User, UserRole } from "@/types/auth"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+vi.mock("@/api/notifications", () => ({
+  getUnreadCount: vi.fn().mockResolvedValue({ count: 0 }),
+  listNotifications: vi.fn(),
+  markNotificationRead: vi.fn(),
+  markAllNotificationsRead: vi.fn(),
+}))
 
 function makeUser(role: UserRole): User {
   return {
@@ -16,8 +24,6 @@ function makeUser(role: UserRole): User {
   }
 }
 
-// Menggambar aplikasi di alamat tertentu. "user" null = belum login.
-// Memakai router di memori (bukan router browser), jadi tidak menyentuh address bar sungguhan.
 function renderAt(path: string, user: User | null) {
   const auth: AuthContextValue = {
     user,
@@ -25,12 +31,15 @@ function renderAt(path: string, user: User | null) {
     login: vi.fn(),
     logout: vi.fn(),
   }
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const router = createMemoryRouter(routes, { initialEntries: [path] })
 
   render(
-    <AuthContext.Provider value={auth}>
-      <RouterProvider router={router} />
-    </AuthContext.Provider>,
+    <QueryClientProvider client={client}>
+      <AuthContext.Provider value={auth}>
+        <RouterProvider router={router} />
+      </AuthContext.Provider>
+    </QueryClientProvider>,
   )
 
   return { router, auth }
