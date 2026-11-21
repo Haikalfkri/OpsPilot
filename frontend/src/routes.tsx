@@ -11,6 +11,8 @@ import NotFoundPage from "@/pages/NotFoundPage"
 import NotificationsPage from "@/pages/NotificationsPage"
 import RouteErrorPage from "@/pages/RouteErrorPage"
 import UsersPage from "@/pages/UsersPage"
+import IncidentDetailPage from "@/pages/IncidentDetailPage"
+import NewIncidentPage from "@/pages/NewIncidentPage"
 
 export const routes: RouteObject[] = [
   {
@@ -29,13 +31,13 @@ export const routes: RouteObject[] = [
             children: [
               { index: true, element: <DashboardPage /> }, // alamat "/"
               { path: "incidents", element: <IncidentsPage /> },
+              { path: "incidents/new", element: <NewIncidentPage /> },
+              { path: "incidents/:id", element: <IncidentDetailPage /> },
               { path: "notifications", element: <NotificationsPage /> },
               {
                 element: <RequireRole allow={canManageUsers} />,
                 children: [{ path: "users", element: <UsersPage /> }],
               },
-              // "*" cocok dengan alamat apa pun yang belum ada. Di dalam layout,
-              // supaya pengguna yang tersasar tetap punya menu.
               { path: "*", element: <NotFoundPage /> },
             ],
           },
