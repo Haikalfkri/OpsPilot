@@ -6,11 +6,11 @@ interface FilterSelectProps {
   value: string
   options: { value: string; label: string }[]
   onChange: (value: string) => void
-  allLabel?: string // kalau diisi, ada pilihan "semua" dengan nilai kosong
+  allLabel?: string
+  disabled?: boolean
 }
 
-export function FilterSelect({ label, value, options, onChange, allLabel }: FilterSelectProps) {
-  // useId menghasilkan id unik, supaya label terhubung dengan kolomnya (penting untuk pembaca layar)
+export function FilterSelect({ label, value, options, onChange, allLabel, disabled }: FilterSelectProps) {
   const id = useId()
 
   return (
@@ -19,8 +19,9 @@ export function FilterSelect({ label, value, options, onChange, allLabel }: Filt
       <select
         id={id}
         value={value}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {allLabel !== undefined && <option value="">{allLabel}</option>}
         {options.map((option) => (

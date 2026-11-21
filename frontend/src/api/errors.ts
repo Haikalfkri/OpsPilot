@@ -34,3 +34,7 @@ export function getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message
     return "Something went wrong."
 }
+
+export function getFieldError(error: unknown, field: string): string | undefined {
+  return isApiError(error) ? error.fieldErrors[field]?.[0] : undefined
+}

@@ -53,10 +53,17 @@ export function SlaBadge({ response, resolution }: { response: SlaState; resolut
     <Badge
       variant="outline"
       className={cn("border-transparent", slaStyles[overall])}
-      // Rincian per target muncul saat kursor diarahkan ke lencana
       title={`Response: ${response} · Resolution: ${resolution}`}
     >
       {slaLabels[overall]}
     </Badge>
   )
+}
+
+export function SlaStateBadge({ state }: { state: SlaState }) {
+    return (
+      <Badge variant="outline" className={cn("border-transparent", slaStyles[state])}>
+        {slaLabels[state]}
+      </Badge>
+    )
 }
