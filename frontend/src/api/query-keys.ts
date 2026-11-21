@@ -16,3 +16,7 @@ export const incidentKeys = {
 export const teamKeys = {
   members: ["team", "members"] as const,
 }
+
+export const slaKeys = {
+  policy: ["sla", "policy"] as const,
+}

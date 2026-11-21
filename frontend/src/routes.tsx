@@ -3,7 +3,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { PublicOnlyRoute } from "@/components/auth/PublicOnlyRoute"
 import { RequireRole } from "@/components/auth/RequireRole"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { canManageUsers } from "@/lib/permissions"
+import { canManageIncidents, canManageUsers } from "@/lib/permissions"
 import DashboardPage from "@/pages/DashboardPage"
 import IncidentsPage from "@/pages/IncidentsPage"
 import LoginPage from "@/pages/LoginPage"
@@ -31,7 +31,10 @@ export const routes: RouteObject[] = [
             children: [
               { index: true, element: <DashboardPage /> }, // alamat "/"
               { path: "incidents", element: <IncidentsPage /> },
-              { path: "incidents/new", element: <NewIncidentPage /> },
+              {
+                element: <RequireRole allow={canManageIncidents} />,
+                children: [{ path: "incidents/new", element: <NewIncidentPage /> }],
+              },
               { path: "incidents/:id", element: <IncidentDetailPage /> },
               { path: "notifications", element: <NotificationsPage /> },
               {

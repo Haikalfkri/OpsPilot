@@ -108,3 +108,11 @@ export interface UpdateIncidentRequest {
   description?: string
   severity?: IncidentSeverity
 }
+
+// Isi form "New incident". Tanpa teamId dan createdBy: keduanya ditentukan backend dari token.
+export interface CreateIncidentRequest {
+  title: string
+  description: string
+  severity: IncidentSeverity
+  assigneeId?: string
+}

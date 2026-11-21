@@ -8,7 +8,7 @@ export function isPast(iso: string, now: Date = new Date()): boolean {
   return new Date(iso).getTime() < now.getTime()
 }
 
-function formatDuration(totalMinutes: number): string {
+export function formatDuration(totalMinutes: number): string {
   const days = Math.floor(totalMinutes / 1440)
   const hours = Math.floor((totalMinutes % 1440) / 60)
   const minutes = totalMinutes % 60

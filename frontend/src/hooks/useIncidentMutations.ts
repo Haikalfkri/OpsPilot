@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query"
-import { addComment, assignIncident, changeIncidentStatus, updateIncident } from "@/api/incidents"
+import { addComment, assignIncident, changeIncidentStatus, updateIncident, createIncident } from "@/api/incidents"
 import { incidentKeys } from "@/api/query-keys"
 import type { IncidentDetail, IncidentStatus, UpdateIncidentRequest } from "@/types/incident"
 
@@ -52,6 +52,19 @@ export function useAddComment(id: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: incidentKeys.commentsAll(id) })
       void queryClient.invalidateQueries({ queryKey: incidentKeys.activitiesAll(id) })
+    },
+  })
+}
+
+export function useCreateIncident() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: createIncident,
+    onSuccess: (incident) => {
+      queryClient.setQueryData(incidentKeys.detail(incident.id), incident)
+      void queryClient.invalidateQueries({ queryKey: incidentKeys.lists() })
+      // Tahap 9: angka dashboard juga akan disegarkan di sini
     },
   })
 }

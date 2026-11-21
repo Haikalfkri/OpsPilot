@@ -9,12 +9,17 @@ import type {
   IncidentSummary,
   ListIncidentsParams,
   UpdateIncidentRequest,
+  CreateIncidentRequest,
 } from "@/types/incident"
 
 const base = (id: string) => `/api/v1/incidents/${encodeURIComponent(id)}`
 
 export function listIncidents(params: ListIncidentsParams, signal?: AbortSignal) {
   return http.get<PagedResult<IncidentSummary>>("/api/v1/incidents", { query: params, signal })
+}
+
+export function createIncident(body: CreateIncidentRequest) {
+  return http.post<IncidentDetail>("/api/v1/incidents", body)
 }
 
 export function getIncident(id: string, signal?: AbortSignal) {

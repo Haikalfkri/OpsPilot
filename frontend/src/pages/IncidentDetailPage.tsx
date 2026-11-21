@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useIncident } from "@/hooks/useIncidentDetail"
 import { formatDateTime } from "@/lib/format"
 import { canManageIncidents } from "@/lib/permissions"
+import { FlashNotice } from "@/components/FlashNotice"
 
 function BackLink() {
   return (
@@ -80,7 +81,7 @@ export default function IncidentDetailPage() {
   return (
     <div className="space-y-6">
       <BackLink />
-
+      <FlashNotice />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
