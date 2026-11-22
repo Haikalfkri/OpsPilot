@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { FilterSelect } from "@/components/FilterSelect"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,6 +5,7 @@ import { Label } from "@/components/ui/label"
 import { SORT_OPTIONS, type IncidentFilters } from "@/lib/incident-filters"
 import { SEVERITIES, STATUSES } from "@/types/incident"
 import type { TeamMember } from "@/types/team"
+import { SearchBox } from "@/components/SearchBox"
 
 interface IncidentFilterBarProps {
   filters: IncidentFilters
@@ -13,39 +13,6 @@ interface IncidentFilterBarProps {
   canClear: boolean
   onChange: (patch: Partial<IncidentFilters>) => void
   onClear: () => void
-}
-
-function SearchBox({ value, onSearch }: { value: string; onSearch: (text: string) => void }) {
-  const [text, setText] = useState(value)
-  const [lastValue, setLastValue] = useState(value)
-
-  if (value !== lastValue) {
-    setLastValue(value)
-    setText(value)
-  }
-
-  return (
-    <form
-      role="search"
-      className="flex gap-2"
-      onSubmit={(event) => {
-        event.preventDefault()
-        onSearch(text.trim())
-      }}
-    >
-      <Input
-        type="search"
-        aria-label="Search incidents"
-        placeholder="Search title or description…"
-        maxLength={100}
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-      />
-      <Button type="submit" variant="secondary">
-        Search
-      </Button>
-    </form>
-  )
 }
 
 export function IncidentFilterBar({ filters, members, canClear, onChange, onClear }: IncidentFilterBarProps) {
@@ -57,7 +24,12 @@ export function IncidentFilterBar({ filters, members, canClear, onChange, onClea
 
   return (
     <div className="space-y-3">
-      <SearchBox value={filters.search} onSearch={(search) => onChange({ search })} />
+      <SearchBox
+        label="Search incidents"
+        placeholder="Search title or description…"
+        value={filters.search}
+        onSearch={(search) => onChange({ search })}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <FilterSelect

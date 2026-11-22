@@ -17,6 +17,7 @@ import { useIncident } from "@/hooks/useIncidentDetail"
 import { formatDateTime } from "@/lib/format"
 import { canManageIncidents } from "@/lib/permissions"
 import { FlashNotice } from "@/components/FlashNotice"
+import { PostmortemSection } from "@/components/incidents/PostmortemSection"
 
 function BackLink() {
   return (
@@ -110,6 +111,7 @@ export default function IncidentDetailPage() {
             </CardContent>
           </Card>
 
+          <PostmortemSection incident={data} canWrite={canWrite} />
           <CommentsSection incidentId={data.id} canWrite={canWrite} />
           <ActivityTimeline incidentId={data.id} />
         </div>

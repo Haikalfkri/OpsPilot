@@ -1,4 +1,5 @@
-export type UserRole = "Admin" | "Responder" | "Viewer"
+export const ROLES = ["Admin", "Responder", "Viewer"] as const
+export type UserRole = (typeof ROLES)[number]
 
 export interface User {
   id: string

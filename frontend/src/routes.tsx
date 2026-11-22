@@ -13,6 +13,8 @@ import RouteErrorPage from "@/pages/RouteErrorPage"
 import UsersPage from "@/pages/UsersPage"
 import IncidentDetailPage from "@/pages/IncidentDetailPage"
 import NewIncidentPage from "@/pages/NewIncidentPage"
+import NewUserPage from "@/pages/NewUserPage"
+import UserDetailPage from "@/pages/UserDetailPage"
 
 export const routes: RouteObject[] = [
   {
@@ -39,7 +41,11 @@ export const routes: RouteObject[] = [
               { path: "notifications", element: <NotificationsPage /> },
               {
                 element: <RequireRole allow={canManageUsers} />,
-                children: [{ path: "users", element: <UsersPage /> }],
+                children: [
+                  { path: "users", element: <UsersPage /> },
+                  { path: "users/new", element: <NewUserPage /> },
+                  { path: "users/:id", element: <UserDetailPage /> },
+                ],
               },
               { path: "*", element: <NotFoundPage /> },
             ],

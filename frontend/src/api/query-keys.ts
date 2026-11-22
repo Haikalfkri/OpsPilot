@@ -1,5 +1,6 @@
 import type { ListIncidentsParams } from "@/types/incident"
 import type { ListNotificationsParams } from "@/types/notification"
+import type { ListUsersParams } from "@/types/user"
 
 const all = ["incidents"] as const
 
@@ -12,6 +13,7 @@ export const incidentKeys = {
   activities: (id: string, page: number) => [...all, "detail", id, "activities", page] as const,
   commentsAll: (id: string) => [...all, "detail", id, "comments"] as const,
   comments: (id: string, page: number) => [...all, "detail", id, "comments", page] as const,
+  postmortem: (id: string) => [...all, "detail", id, "postmortem"] as const,
 }
 
 export const teamKeys = {
@@ -38,4 +40,13 @@ export const dashboardKeys = {
   summary: (days: number) => [...dashboardRoot, "summary", days] as const,
   breakdown: (days: number) => [...dashboardRoot, "breakdown", days] as const,
   trends: (days: number) => [...dashboardRoot, "trends", days] as const,
+}
+
+const usersRoot = ["users"] as const
+
+export const userKeys = {
+  all: usersRoot,
+  lists: () => [...usersRoot, "list"] as const,
+  list: (params: ListUsersParams) => [...usersRoot, "list", params] as const,
+  detail: (id: string) => [...usersRoot, "detail", id] as const,
 }
