@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query"
 import { addComment, assignIncident, changeIncidentStatus, updateIncident, createIncident } from "@/api/incidents"
-import { incidentKeys } from "@/api/query-keys"
+import { dashboardKeys, incidentKeys } from "@/api/query-keys"
 import type { IncidentDetail, IncidentStatus, UpdateIncidentRequest } from "@/types/incident"
 
 function syncIncident(queryClient: QueryClient, id: string, incident: IncidentDetail) {
   queryClient.setQueryData(incidentKeys.detail(id), incident)
   void queryClient.invalidateQueries({ queryKey: incidentKeys.lists() })
   void queryClient.invalidateQueries({ queryKey: incidentKeys.activitiesAll(id) })
-  // Tahap 9: angka dashboard juga akan disegarkan di sini
+  void queryClient.invalidateQueries({ queryKey: dashboardKeys.all })
 }
 
 function refreshDetail(queryClient: QueryClient, id: string) {
@@ -64,7 +64,7 @@ export function useCreateIncident() {
     onSuccess: (incident) => {
       queryClient.setQueryData(incidentKeys.detail(incident.id), incident)
       void queryClient.invalidateQueries({ queryKey: incidentKeys.lists() })
-      // Tahap 9: angka dashboard juga akan disegarkan di sini
+      void queryClient.invalidateQueries({ queryKey: dashboardKeys.all })
     },
   })
 }

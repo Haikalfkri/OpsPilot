@@ -1,7 +1,15 @@
 import { cleanup } from "@testing-library/react"
-import { afterEach } from "vitest"
+import { afterEach, vi } from "vitest"
 
-// Bersihkan komponen yang digambar sesudah tiap tes, supaya antar-tes tidak saling mengganggu
+vi.stubGlobal(
+  "ResizeObserver",
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
+)
+
 afterEach(() => {
   cleanup()
 })

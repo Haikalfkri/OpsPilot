@@ -30,3 +30,12 @@ export const notificationKeys = {
   list: (params: ListNotificationsParams) => [...notificationsRoot, "list", params] as const,
   unreadCount: () => [...notificationsRoot, "unread-count"] as const,
 }
+
+const dashboardRoot = ["dashboard"] as const
+
+export const dashboardKeys = {
+  all: dashboardRoot,
+  summary: (days: number) => [...dashboardRoot, "summary", days] as const,
+  breakdown: (days: number) => [...dashboardRoot, "breakdown", days] as const,
+  trends: (days: number) => [...dashboardRoot, "trends", days] as const,
+}

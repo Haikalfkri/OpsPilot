@@ -13,6 +13,11 @@ vi.mock("@/api/notifications", () => ({
   markAllNotificationsRead: vi.fn(),
 }))
 
+vi.mock("@/pages/DashboardPage", async () => {
+  const { createElement } = await import("react")
+  return { default: () => createElement("h1", null, "Dashboard") }
+})
+
 function makeUser(role: UserRole): User {
   return {
     id: "user-1",
