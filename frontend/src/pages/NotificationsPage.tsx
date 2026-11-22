@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useMarkAllNotificationsRead } from "@/hooks/useNotificationMutations"
 import { useNotifications, useUnreadCount } from "@/hooks/useNotifications"
 import { NOTIFICATIONS_PAGE_SIZE } from "@/lib/constants"
+import { usePageTitle } from "@/hooks/usePageTitle"
 import {
   parseNotificationFilters,
   toNotificationApiParams,
@@ -18,6 +19,7 @@ import {
 
 export default function NotificationsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  usePageTitle("Notifications")
 
   const filters = parseNotificationFilters(searchParams)
   const notifications = useNotifications(toNotificationApiParams(filters))

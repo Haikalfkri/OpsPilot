@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDashboardBreakdown, useDashboardSummary, useDashboardTrends } from "@/hooks/useDashboard"
 import { useIncidents } from "@/hooks/useIncidents"
 import { RECENT_INCIDENTS_COUNT } from "@/lib/constants"
+import { usePageTitle } from "@/hooks/usePageTitle"
 import {
   describeCounts,
   formatAverageResolution,
@@ -32,6 +33,7 @@ const RECENT_PARAMS: ListIncidentsParams = {
 
 export default function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  usePageTitle("Dashboard")
 
   // URL -> periode. URL adalah satu-satunya sumber kebenaran.
   const days = parseDashboardDays(searchParams)

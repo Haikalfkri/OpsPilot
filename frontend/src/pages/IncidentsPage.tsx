@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
 import { useIncidents } from "@/hooks/useIncidents"
 import { useTeamMembers } from "@/hooks/useTeamMembers"
+import { usePageTitle } from "@/hooks/usePageTitle"
 import {
   PAGE_SIZE,
   hasActiveFilters,
@@ -22,6 +23,7 @@ import { canManageIncidents } from "@/lib/permissions"
 export default function IncidentsPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  usePageTitle("Incidents")
 
   // URL -> filter -> parameter API. URL adalah satu-satunya sumber kebenaran.
   const filters = parseFilters(searchParams)

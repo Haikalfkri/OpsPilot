@@ -1,6 +1,6 @@
 import { Link } from "react-router"
 import { RoleBadge, UserStatusBadge } from "@/components/users/UserBadges"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import type { User } from "@/types/auth"
 
@@ -14,6 +14,7 @@ export function UserTable({ items, currentUserId, dimmed }: UserTableProps) {
   return (
     <div className={cn("rounded-md border transition-opacity", dimmed && "opacity-60")}>
       <Table>
+        <TableCaption className="sr-only">Users</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>

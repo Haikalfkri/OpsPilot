@@ -1,13 +1,24 @@
-import { Outlet } from "react-router"
+import { useEffect, useRef } from "react"
+import { Outlet, useLocation } from "react-router"
 import { MainNav } from "@/components/layout/MainNav"
+import { NotificationBell } from "@/components/layout/NotificationBell"
 import { getNavItems } from "@/components/layout/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
-import { NotificationBell } from "@/components/layout/NotificationBell"
 
 export function AppLayout() {
   const { user, logout } = useAuth()
+  const { pathname } = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  const previousPath = useRef(pathname)
+
+  useEffect(() => {
+    if (previousPath.current === pathname) return
+
+    previousPath.current = pathname
+    mainRef.current?.focus()
+  }, [pathname])
 
   // Tidak mungkin terjadi di dalam ProtectedRoute; baris ini hanya menenangkan TypeScript
   if (!user) return null
@@ -16,6 +27,15 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* Tautan lompat: tersembunyi sampai menerima fokus (tombol Tab pertama).
+          Pengguna papan ketik bisa melewati menu dan langsung ke isi halaman. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
+
       {/* Menu samping: hanya di layar lebar (md ke atas, 768px) */}
       <aside className="hidden w-56 shrink-0 border-r md:flex md:flex-col">
         <div className="px-4 py-4 text-lg font-semibold">OpsPilot</div>
@@ -29,7 +49,6 @@ export function AppLayout() {
 
           <div className="ml-auto flex items-center gap-3">
             <NotificationBell />
-            
             <div className="hidden text-right text-sm leading-tight sm:block">
               <div className="font-medium">{user.displayName}</div>
               <div className="text-muted-foreground">{user.email}</div>
@@ -46,8 +65,10 @@ export function AppLayout() {
           <MainNav items={items} orientation="horizontal" />
         </div>
 
-        <main className="flex-1 p-4 md:p-6">
-          {/* Di sinilah halaman anak (Dashboard, Incidents, ...) digambar */}
+        {/* tabIndex={-1}: bisa menerima fokus lewat kode (tidak lewat Tab). outline-none: tanpa garis
+            fokus di seluruh area, karena yang difokuskan adalah wadah, bukan kontrol. */}
+        <main id="main-content" ref={mainRef} tabIndex={-1} className="flex-1 p-4 outline-none md:p-6">
+          {/* Di sinilah halaman anak digambar */}
           <Outlet />
         </main>
       </div>

@@ -24,6 +24,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         Environment.SetEnvironmentVariable("ConnectionStrings__Redis", " ");   // spasi = Redis dimatikan
         Environment.SetEnvironmentVariable("Jwt__SigningKey", "kunci-rahasia-untuk-tes-integrasi-minimal-32-karakter");
         Environment.SetEnvironmentVariable("SlaWorker__Enabled", "false");   // tes memicu pengecekan sendiri
+        Environment.SetEnvironmentVariable("RateLimiting__Login__PermitLimit", "100000");   // tes login berulang kali
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

@@ -1,10 +1,11 @@
-// Dipakai React Router kalau terjadi error tak terduga saat menggambar halaman
 import { isRouteErrorResponse, useRouteError } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { usePageTitle } from "@/hooks/usePageTitle"
 
 export default function RouteErrorPage() {
   const error = useRouteError()
+  usePageTitle("Something went wrong")
 
   const message = isRouteErrorResponse(error)
     ? `${error.status} ${error.statusText}`

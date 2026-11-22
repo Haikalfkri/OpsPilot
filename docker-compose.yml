@@ -1,15 +1,18 @@
 name: opspilot
 
 services:
+  # ---------------- Database ----------------
   postgres:
     image: postgres:16-alpine
     container_name: opspilot_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-opspilot}
       POSTGRES_USER: ${POSTGRES_USER:-opspilot}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opspilot_dev}
     ports:
-      - "15433:5432"
+      # 127.0.0.1: hanya terbuka dari komputermu sendiri, tidak dari jaringan
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
       - opspilot-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,17 +25,91 @@ services:
       timeout: 3s
       retries: 10
 
+  # ---------------- Cache ----------------
   redis:
     image: redis:7-alpine
-    container_name: opspilot-redis
-    command: ["redis-server", "--save", "--appendonly", "no"]
+    container_name: opspilot_redis
+    restart: unless-stopped
+    # Hanya cache: tanpa penyimpanan permanen. PostgreSQL adalah sumber kebenaran.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # ---------------- API ----------------
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: opspilot_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Di dalam jaringan Docker, layanan saling memanggil lewat NAMA service (postgres, redis), bukan localhost
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-opspilot};Username=${POSTGRES_USER:-opspilot};Password=${POSTGRES_PASSWORD:-opspilot_dev}
+      ConnectionStrings__Redis: redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000,asyncTimeout=1000
+      # Kosong = API menolak start dengan pesan yang jelas (lihat: docker compose logs api)
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      # Asal frontend yang boleh memanggil API dari browser
+      Cors__AllowedOrigins__0: http://localhost:${WEB_PORT:-5173}
+      # Container berjalan sebagai Production: migration dan data demo dinyalakan secara eksplisit
+      Database__MigrateOnStartup: "true"
+      Database__SeedDemoData: ${SEED_DEMO_DATA:-false}
+      Swagger__Enabled: ${SWAGGER_ENABLED:-false}
+    ports:
+      - "127.0.0.1:${API_PORT:-5130}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # ---------------- Frontend ----------------
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Alamat API sebagaimana dilihat BROWSER (bukan nama service Docker)
+        VITE_API_URL: http://localhost:${API_PORT:-5130}
+    container_name: opspilot_web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5173}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8080/healthz",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
 
 volumes:
   opspilot-pgdata:

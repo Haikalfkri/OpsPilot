@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/hooks/useAuth"
 import { applyServerErrors } from "@/lib/form-errors"
+import { usePageTitle } from "@/hooks/usePageTitle"
+import { clearSessionExpired, wasSessionExpired } from "@/lib/auth-storage"
 
 // Aturan input. Batasnya SAMA dengan LoginRequestValidator di backend (Stage 4).
 // Ini hanya untuk umpan balik cepat; yang memutuskan tetap backend.
@@ -28,6 +30,13 @@ type LoginForm = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const { login } = useAuth()
+  usePageTitle("Sign in")
+  
+  const [sessionExpired] = useState(() => wasSessionExpired())
+
+  useEffect(() => {
+    clearSessionExpired()
+  }, [])
 
   // Pesan umum (bukan milik satu kolom), mis. "Invalid email or password."
   const [formError, setFormError] = useState<string | null>(null)
@@ -62,13 +71,20 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in to OpsPilot</CardTitle>
+          <CardTitle role="heading" aria-level={1}>
+            Sign in to OpsPilot
+          </CardTitle>
           <CardDescription>Use your work email and password.</CardDescription>
         </CardHeader>
 
         <CardContent>
           {/* noValidate: matikan validasi bawaan browser supaya pesan kita yang tampil */}
           <form onSubmit={onSubmit} noValidate className="space-y-4">
+            {sessionExpired && (
+              <Alert role="status">
+                <AlertDescription>Your session has expired. Please sign in again.</AlertDescription>
+              </Alert>
+            )}
             {formError && (
               <Alert variant="destructive">
                 <AlertDescription>{formError}</AlertDescription>

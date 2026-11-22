@@ -18,6 +18,7 @@ import { formatDateTime } from "@/lib/format"
 import { canManageIncidents } from "@/lib/permissions"
 import { FlashNotice } from "@/components/FlashNotice"
 import { PostmortemSection } from "@/components/incidents/PostmortemSection"
+import { usePageTitle } from "@/hooks/usePageTitle"
 
 function BackLink() {
   return (
@@ -31,6 +32,7 @@ export default function IncidentDetailPage() {
   const { id = "" } = useParams<{ id: string }>()
   const { user } = useAuth()
   const incident = useIncident(id)
+  usePageTitle(incident.data?.title ?? "Incident")
   const [editing, setEditing] = useState(false)
 
   if (incident.isPending) {
@@ -92,7 +94,7 @@ export default function IncidentDetailPage() {
                 <StatusBadge status={data.status} />
               </div>
 
-              {!(editing && canEdit) && <CardTitle className="text-2xl">{data.title}</CardTitle>}
+              {!(editing && canEdit) && <CardTitle className="text-2xl" role="heading" aria-level={1}>{data.title}</CardTitle>}
             </CardHeader>
 
             <CardContent className="space-y-4">

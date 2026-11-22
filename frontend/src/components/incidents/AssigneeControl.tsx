@@ -40,7 +40,11 @@ export function AssigneeControl({ incident, canEdit }: AssigneeControlProps) {
         disabled={assign.isPending}
         onChange={(value) => assign.mutate(value || null)}
       />
-
+      {members.isError && (
+        <p role="alert" className="text-xs text-destructive">
+          Could not load team members.
+        </p>
+      )}
       {assign.isPending && <p className="text-xs text-muted-foreground">Saving…</p>}
 
       {assign.isError && (

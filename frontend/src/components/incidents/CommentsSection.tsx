@@ -131,7 +131,7 @@ export function CommentsSection({ incidentId, canWrite }: CommentsSectionProps) 
                 {errors.body.message}
               </p>
             )}
-
+            <p className="text-xs text-muted-foreground">Comments cannot be edited or deleted after posting.</p>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Posting…" : "Post comment"}
             </Button>

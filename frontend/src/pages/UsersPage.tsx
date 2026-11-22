@@ -11,6 +11,7 @@ import { UserTable } from "@/components/users/UserTable"
 import { useAuth } from "@/hooks/useAuth"
 import { useUsers } from "@/hooks/useUsers"
 import { USERS_PAGE_SIZE } from "@/lib/constants"
+import { usePageTitle } from "@/hooks/usePageTitle"
 import {
   hasActiveUserFilters,
   parseUserFilters,
@@ -22,6 +23,7 @@ import {
 export default function UsersPage() {
   const { user: me } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  usePageTitle("Users")
 
   // URL -> filter -> parameter API. URL adalah satu-satunya sumber kebenaran.
   const filters = parseUserFilters(searchParams)

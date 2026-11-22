@@ -7,6 +7,13 @@ using OpsPilot.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------- Kestrel (server web bawaan) ----------
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.AddServerHeader = false;               // jangan umumkan "Server: Kestrel"
+    options.Limits.MaxRequestBodySize = 1_000_000; // 1 MB: permintaan terbesar kita hanya belasan KB
+});
+
 // ---------- Logging ----------
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -21,22 +28,50 @@ builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
+// ---------- Header keamanan untuk SEMUA respons ----------
+// OnStarting dijalankan tepat sebelum respons dikirim, jadi header ikut terpasang juga pada respons error.
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        var headers = context.Response.Headers;
+        headers["X-Content-Type-Options"] = "nosniff"; // browser tidak boleh menebak jenis isi
+        headers["Referrer-Policy"] = "no-referrer";
+        headers["Cache-Control"] = "no-store"; // token dan data pribadi tidak boleh disimpan cache
+        return Task.CompletedTask;
+    });
+
+    await next();
+});
+
 // ---------- Middleware (URUTAN PENTING) ----------
 app.UseSerilogRequestLogging();
-app.UseCors(ServiceCollectionExtensions.CorsPolicyName);
+app.UseCors(ServiceCollectionExtensions.CorsPolicyName); // sebelum penangan error: respons error tetap membawa header CORS
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-if (app.Environment.IsDevelopment())
+var isDevelopment = app.Environment.IsDevelopment();
+
+// Swagger: Development, atau dinyalakan eksplisit (stack demo)
+if (isDevelopment || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    // Hanya Development: buat tabel + isi data demo
-    await app.Services.InitialiseDatabaseAsync(seedDemoData: true);
 }
 
-//app.UseCors(ServiceCollectionExtensions.CorsPolicyName);
+// ---------- Basis data: migration dan data demo ----------
+// Development: otomatis. Lingkungan lain: HANYA kalau dinyalakan lewat pengaturan.
+// Data demo berisi akun dengan password yang diketahui publik, jadi tidak pernah menyala sendiri di luar Development.
+var seedDemoData = isDevelopment || app.Configuration.GetValue<bool>("Database:SeedDemoData");
+var migrate = seedDemoData || app.Configuration.GetValue<bool>("Database:MigrateOnStartup");
+
+if (seedDemoData && !isDevelopment)
+    app.Logger.LogWarning("Demo accounts are being seeded outside Development. Use this for local demos only.");
+
+if (migrate)
+    await app.Services.InitialiseDatabaseAsync(seedDemoData);
+
+app.UseRateLimiter(); // setelah CORS: respons 429 tetap terbaca oleh browser
 app.UseAuthentication();
 app.UseAuthorization();
 

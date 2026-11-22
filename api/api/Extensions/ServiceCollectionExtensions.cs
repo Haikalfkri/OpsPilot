@@ -7,6 +7,10 @@ using OpsPilot.Api.Middleware;
 using OpsPilot.Api.Services;
 using OpsPilot.Application.Common.Interfaces;
 using OpsPilot.Domain.Enums;
+using System.Globalization;
+using System.Threading.RateLimiting;
+using Microsoft.Extensions.Options;
+using OpsPilot.Api.RateLimiting;
 
 namespace OpsPilot.Api.Extensions;
 
@@ -100,6 +104,45 @@ public static class ServiceCollectionExtensions
                     Array.Empty<string>()
                 }
             });
+        });
+
+        // ---- Pembatasan laju (login) ----
+        services.AddOptions<LoginRateLimitOptions>()
+            .Bind(configuration.GetSection(LoginRateLimitOptions.SectionName))
+            .Validate(o => o.PermitLimit >= 1 && o.WindowSeconds >= 1,
+                "RateLimiting:Login: PermitLimit and WindowSeconds must be at least 1.")
+            .ValidateOnStart();
+
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // Batas dibaca saat permintaan datang (bukan saat aplikasi start), dari opsi di atas
+            options.AddPolicy(RateLimitPolicies.Login, context =>
+            {
+                var limits = context.RequestServices.GetRequiredService<IOptions<LoginRateLimitOptions>>().Value;
+                return LoginRateLimit.GetPartition(context, limits);
+            });
+
+            // Jawaban 429 memakai bentuk Problem Details yang sama dengan error lain
+            options.OnRejected = async (context, _) =>
+            {
+                var http = context.HttpContext;
+
+                var retryAfterSeconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+                    ? (int)Math.Ceiling(retryAfter.TotalSeconds)
+                    : 60;
+
+                http.Response.Headers["Retry-After"] = retryAfterSeconds.ToString(CultureInfo.InvariantCulture);
+
+                await Results.Problem(
+                        title: "Too many requests",
+                        detail: "Too many sign-in attempts. Please wait a moment and try again.",
+                        statusCode: StatusCodes.Status429TooManyRequests,
+                        type: "https://httpstatuses.com/429",
+                        extensions: new Dictionary<string, object?> { ["traceId"] = http.TraceIdentifier })
+                    .ExecuteAsync(http);
+            };
         });
 
         return services;

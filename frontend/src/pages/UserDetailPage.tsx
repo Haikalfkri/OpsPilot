@@ -9,6 +9,7 @@ import { EditUserForm } from "@/components/users/EditUserForm"
 import { RoleBadge, UserStatusBadge } from "@/components/users/UserBadges"
 import { useAuth } from "@/hooks/useAuth"
 import { useUser } from "@/hooks/useUsers"
+import { usePageTitle } from "@/hooks/usePageTitle"
 
 function BackLink() {
   return (
@@ -22,6 +23,7 @@ export default function UserDetailPage() {
   const { id = "" } = useParams<{ id: string }>()
   const { user: me } = useAuth()
   const user = useUser(id)
+  usePageTitle(user.data?.displayName ?? "User")
 
   if (user.isPending) {
     return (

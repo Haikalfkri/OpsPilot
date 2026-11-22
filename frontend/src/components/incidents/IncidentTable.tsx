@@ -1,7 +1,7 @@
 import { Link } from "react-router"
 import { SeverityBadge, SlaBadge, StatusBadge } from "@/components/incidents/IncidentBadges"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table"
 import { formatDateTime, formatRelative, isPast } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { IncidentSummary } from "@/types/incident"
@@ -27,6 +27,7 @@ export function IncidentTable({ items, dimmed }: { items: IncidentSummary[]; dim
     // dimmed = halaman berikutnya sedang dimuat: tabel lama dipudarkan, bukan dikosongkan
     <div className={cn("rounded-md border transition-opacity", dimmed && "opacity-60")}>
       <Table>
+        <TableCaption className="sr-only">Incidents</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>

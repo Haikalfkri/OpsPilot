@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OpsPilot.Api.Auth;
 using OpsPilot.Application.Auth;
+using Microsoft.AspNetCore.RateLimiting;
+using OpsPilot.Api.RateLimiting;
 
 namespace OpsPilot.Api.Controllers
 {
@@ -10,6 +11,7 @@ namespace OpsPilot.Api.Controllers
     {
         // masuk dengan email dan password. mengembalikan token jwt
         [AllowAnonymous]
+        [EnableRateLimiting(RateLimitPolicies.Login)]
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

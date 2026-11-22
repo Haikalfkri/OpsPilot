@@ -14,12 +14,14 @@ import { applyServerErrors } from "@/lib/form-errors"
 import { noticeState } from "@/lib/navigation-state"
 import { PASSWORD_HINT, createUserSchema, type CreateUserValues } from "@/lib/user-schemas"
 import { ROLES } from "@/types/auth"
+import { usePageTitle } from "@/hooks/usePageTitle"
 
 export default function NewUserPage() {
   const navigate = useNavigate()
   const createUser = useCreateUser()
   const [formError, setFormError] = useState<string | null>(null)
-
+  usePageTitle("Add user")
+  
   const {
     register,
     handleSubmit,
@@ -71,7 +73,7 @@ export default function NewUserPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Add user</CardTitle>
+          <CardTitle className="text-2xl" role="heading" aria-level={1}>Add user</CardTitle>
           <CardDescription>The new user joins your team and can sign in right away.</CardDescription>
         </CardHeader>
 

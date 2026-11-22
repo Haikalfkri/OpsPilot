@@ -18,6 +18,7 @@ import { formatDuration } from "@/lib/format"
 import { applyServerErrors } from "@/lib/form-errors"
 import { noticeState } from "@/lib/navigation-state"
 import { SEVERITIES, type IncidentSeverity } from "@/types/incident"
+import { usePageTitle } from "@/hooks/usePageTitle"
 
 const createSchema = z.object({
   title: z
@@ -42,6 +43,10 @@ function SlaHint({ severity }: { severity: IncidentSeverity | undefined }) {
   const policy = useSlaPolicy()
   const target = policy.data?.targets.find((item) => item.severity === severity)
 
+  if (policy.isError) {
+    return <p className="text-xs text-muted-foreground">SLA targets are unavailable right now.</p>
+  }
+
   if (!severity || !target) {
     return <p className="text-xs text-muted-foreground">Pick a severity to see its SLA targets.</p>
   }
@@ -58,6 +63,7 @@ export default function NewIncidentPage() {
   const navigate = useNavigate()
   const members = useTeamMembers()
   const createIncident = useCreateIncident()
+  usePageTitle("New incident")
 
   // Pesan umum (bukan milik satu kolom), mis. "Cannot reach the server."
   const [formError, setFormError] = useState<string | null>(null)
@@ -118,7 +124,7 @@ export default function NewIncidentPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">New incident</CardTitle>
+          <CardTitle className="text-2xl" role="heading" aria-level={1}>New incident</CardTitle>
           <CardDescription>Describe what is happening. You can assign it now or later.</CardDescription>
         </CardHeader>
 
@@ -165,6 +171,7 @@ export default function NewIncidentPage() {
                   // shouldValidate: pesan "Select a severity." hilang begitu pengguna memilih
                   onChange={(value) => setValue("severity", value, { shouldValidate: Boolean(errors.severity) })}
                 />
+
                 {errors.severity && (
                   <p role="alert" className="text-sm text-destructive">
                     {errors.severity.message}
@@ -181,11 +188,19 @@ export default function NewIncidentPage() {
                   options={assigneeOptions}
                   onChange={(value) => setValue("assigneeId", value)}
                 />
+
                 {errors.assigneeId && (
                   <p role="alert" className="text-sm text-destructive">
                     {errors.assigneeId.message}
                   </p>
                 )}
+
+                {members.isError && (
+                  <p role="alert" className="text-xs text-destructive">
+                    Could not load team members. You can still create the incident without an assignee.
+                  </p>
+                )}
+
                 <p className="text-xs text-muted-foreground">Optional. The assignee is notified.</p>
               </div>
             </div>
