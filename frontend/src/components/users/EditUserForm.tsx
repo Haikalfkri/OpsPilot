@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { getErrorMessage } from "@/api/errors"
 import { FilterSelect } from "@/components/FilterSelect"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -28,7 +28,7 @@ export function EditUserForm({ user, isSelf }: EditUserFormProps) {
     handleSubmit,
     setError,
     setValue,
-    watch,
+    control,
     reset,
     formState: { errors, isDirty },
   } = useForm<EditUserValues>({
@@ -36,7 +36,7 @@ export function EditUserForm({ user, isSelf }: EditUserFormProps) {
     defaultValues: { displayName: user.displayName, role: user.role },
   })
 
-  const role = watch("role")
+   const role = useWatch({ control, name: "role" })
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)

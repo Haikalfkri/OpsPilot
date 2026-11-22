@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { getErrorMessage } from "@/api/errors"
 import { FilterSelect } from "@/components/FilterSelect"
@@ -43,7 +43,7 @@ export function IncidentEditForm({ incident, onDone }: IncidentEditFormProps) {
     handleSubmit,
     setError,
     setValue,
-    watch,
+    control,
     formState: { errors, isDirty },
   } = useForm<EditForm>({
     resolver: zodResolver(editSchema),
@@ -54,7 +54,7 @@ export function IncidentEditForm({ incident, onDone }: IncidentEditFormProps) {
     },
   })
 
-  const severity = watch("severity")
+  const severity = useWatch({ control, name: "severity" })
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)

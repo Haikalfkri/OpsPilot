@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { Link, useNavigate } from "react-router"
 import { z } from "zod"
 import { getErrorMessage } from "@/api/errors"
@@ -73,7 +73,7 @@ export default function NewIncidentPage() {
     handleSubmit,
     setError,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
@@ -81,8 +81,8 @@ export default function NewIncidentPage() {
   })
 
   // Dua dropdown memakai komponen biasa, jadi nilainya dipantau dengan watch
-  const severity = watch("severity")
-  const assigneeId = watch("assigneeId")
+  const severity = useWatch({ control, name: "severity" })
+  const assigneeId = useWatch({ control, name: "assigneeId" })
   const selectedSeverity = SEVERITIES.find((item) => item === severity)
 
   // Backend menolak Viewer sebagai assignee, jadi tidak ditawarkan

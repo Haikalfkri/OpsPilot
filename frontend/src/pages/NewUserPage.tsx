@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { Link, useNavigate } from "react-router"
 import { getErrorMessage, isApiError } from "@/api/errors"
 import { FilterSelect } from "@/components/FilterSelect"
@@ -27,7 +27,7 @@ export default function NewUserPage() {
     handleSubmit,
     setError,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateUserValues>({
     resolver: zodResolver(createUserSchema),
@@ -35,7 +35,7 @@ export default function NewUserPage() {
     defaultValues: { email: "", displayName: "", password: "", role: "" },
   })
 
-  const role = watch("role")
+  const role = useWatch({ control, name: "role" })
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
