@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query"
 import { addComment, assignIncident, changeIncidentStatus, updateIncident, createIncident } from "@/api/incidents"
 import { dashboardKeys, incidentKeys } from "@/api/query-keys"
-import type { IncidentDetail, IncidentStatus, UpdateIncidentRequest } from "@/types/incident"
+import type { IncidentDetail, IncidentStatus, UpdateIncidentRequest, CreateIncidentRequest, } from "@/types/incident"
 
 function syncIncident(queryClient: QueryClient, id: string, incident: IncidentDetail) {
   queryClient.setQueryData(incidentKeys.detail(id), incident)
@@ -60,7 +60,7 @@ export function useCreateIncident() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: createIncident,
+    mutationFn: (body: CreateIncidentRequest) => createIncident(body),
     onSuccess: (incident) => {
       queryClient.setQueryData(incidentKeys.detail(incident.id), incident)
       void queryClient.invalidateQueries({ queryKey: incidentKeys.lists() })

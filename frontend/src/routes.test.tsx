@@ -18,6 +18,11 @@ vi.mock("@/pages/DashboardPage", async () => {
   return { default: () => createElement("h1", null, "Dashboard") }
 })
 
+vi.mock("@/pages/UsersPage", async () => {
+  const { createElement } = await import("react")
+  return { default: () => createElement("h1", null, "Users") }
+})
+
 function makeUser(role: UserRole): User {
   return {
     id: "user-1",
@@ -68,7 +73,7 @@ describe("route guards", () => {
   it("moves a signed-in user away from the login page", async () => {
     const { router } = renderAt("/login", makeUser("Admin"))
 
-    expect(await screen.findByText(/Welcome back, Demo Admin/)).toBeTruthy()
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeTruthy()
     expect(router.state.location.pathname).toBe("/")
   })
 

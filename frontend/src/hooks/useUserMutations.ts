@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query"
 import { createUser, updateUser } from "@/api/users"
 import { teamKeys, userKeys } from "@/api/query-keys"
-import type { UpdateUserRequest } from "@/types/user"
+import type { CreateUserRequest, UpdateUserRequest } from "@/types/user"
 
 // Setelah user berubah: daftar user usang, dan dropdown assignee juga
 // (ia berisi user aktif dan role mereka, dan di-cache 5 menit).
@@ -14,7 +14,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: createUser,
+    mutationFn: (body: CreateUserRequest) => createUser(body),
     onSuccess: (user) => {
       queryClient.setQueryData(userKeys.detail(user.id), user)
       refreshUsers(queryClient)

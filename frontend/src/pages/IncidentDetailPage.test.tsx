@@ -135,7 +135,7 @@ describe("IncidentDetailPage: reading", () => {
     expect(screen.getByText(/^System ·/)).toBeTruthy() // aksi tanpa pelaku ditampilkan sebagai System
   })
 
-  it("shows existing comments", async () => {
+    it("shows existing comments", async () => {
     vi.mocked(listComments).mockResolvedValue(
       pageOf<IncidentComment>([
         {
@@ -150,8 +150,8 @@ describe("IncidentDetailPage: reading", () => {
     )
     renderPage()
 
-    expect(await screen.findByText("Looking into it")).toBeTruthy()
-    expect(screen.getByText("Demo Responder")).toBeTruthy()
+    const comment = (await screen.findByText("Looking into it")).closest("li")!
+    expect(within(comment).getByText("Demo Responder")).toBeTruthy()
   })
 
   it("explains when the incident does not exist", async () => {
